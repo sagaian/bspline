@@ -192,7 +192,7 @@ double InstaneousRate(double *r, int m, double t )
 double DiscountFactor(double *f, int m, double S, double T, double offset )
 {
 	S -= offset;
-	T -= offset;
+	//T -= offset;
 	double total = 0;
 	for(int i = 0; i < m; i++){
 		total -= f[i]*SplineIntegrateBounded(3, i, S, T); 		
@@ -204,7 +204,7 @@ double AnnuityValuation(double *f, int m, double S, double T, double offset, dou
 {
 	double alpha = dayCount/360; //day count fraction 180/360
 	double total = 0;
-	int nCoupons = (int)( T / dayCount );
+	int nCoupons = (int)( (T-S) / dayCount );
 	for( int i = 1; i <= nCoupons; i++ )
 	{
 		total += DiscountFactor( f, m, S, S + i*dayCount, offset );
@@ -217,7 +217,7 @@ double SwapFloatingValuation(double *l, int m, double S, double T, double offset
 {
 	double delta = dayCount/360;
 	double total = 0;
-	int nCoupons = ( int )( T / dayCount );
+	int nCoupons = ( int )( (T-S) / dayCount );
 
 	for( int i = 1; i <= nCoupons; i++ )
 	{
@@ -328,7 +328,7 @@ void spline(double *p, double *x, int m, int n, void *data)
 	}
 }
 
-int main()
+/*int main()
 {
 	double p[28] =
 	{ 0.00003672,
@@ -445,7 +445,7 @@ int main()
 		printf("%f\n", val);
 	}
 
-
+*/
 	/*int ret;
 	  int i;
 	  double opts[LM_OPTS_SZ], info[LM_INFO_SZ];
@@ -490,7 +490,7 @@ int main()
 	   printf("%f\n", val);
 	   }  
 	 */
-	return 0;
-}
+	//return 0;
+//}
 
 

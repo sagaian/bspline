@@ -22,16 +22,17 @@ CFLAGS = -g -Wall -pedantic -O0 -std=gnu99
 # The LDFLAGS variable sets flags for linker
 #  -lm    link in libm (math library)
 #  -m32	  link with IA32 libraries
-LAPACKLIBS_PATH =/usr/local/lib 
-LDFLAGS = -L$(-LAPACKLIBS_PATH)$ -L. -lm  
+LAPACKLIBS_PATH =/usr/local/lib
+GSL_PATH=/usr/local/include
+LDFLAGS = -L$(-LAPACKLIBS_PATH)$ -L$(-GSL_PATH)$ -L. -lm   
 
 # In this section, you list the files that are part of the project.
 # If you add/change names of header/source files, here is where you
 # edit the Makefile.
 HEADERS = spline.h
-SOURCES = spline.c 
+SOURCES = spline.c swaption.c 
 OBJECTS = $(SOURCES:.c=.o)
-LIBRARIES = -llevmar -llapack -lblas -lf2c
+LIBRARIES = -llevmar -llapack -lblas -lf2c -lgsl -lgslcblas
 TARGET = spline
 
 
