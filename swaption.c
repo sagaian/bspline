@@ -1,5 +1,6 @@
 #include <gsl/gsl_randist.h>
 #include <gsl/gsl_cdf.h>
+#include <gsl/gsl_sf.h>
 #include <math.h>
 #include "spline.h"
 #include "swaption.h"
@@ -66,6 +67,38 @@ double pRec(double *l, double m, double To, double T, double K, double Fo, doubl
 	return p;
 }
 
+
+double bnCallDeriv(double T, double K, double Fo, double s)
+{
+	double term1 = -(K-Fo)*gsl_sf_erfc(-(-K+Fo)/(sqrt(2*T)*s))/(2*s);
+	double term2 = sqrt(T)*(exp(-pow(-K+Fo,2)/(2*T*pow(s,2)))/sqrt(2*M_PI))-term1;	
+	return term1+term2;
+}
+
+
+double f(double T, double K, double Fo, double s, double sn)
+{
+	return bnCall(T,K,Fo,sn)-bCall(T,K,Fo,s);
+}
+
+double f1(double T,double K, double Fo, double s)
+{
+	return bnCallDeriv(T,K,Fo,s);
+}
+
+double lognormalToNormalVol(double T, double K, double Fo, double s, double approx, double epsilon)
+{
+	double xPrev = approx;
+	double x = 0;
+	while(1)
+	{
+		x = xPrev-f(T,K,Fo,s,xPrev)/f1(T,K,Fo,xPrev);
+		if(abs(x-xPrev)<epsilon || x < epsilon) break;
+	};
+	return x;
+}
+
+
 int main()
 {
 	double l[] = {0.05784418, 0.06702633, -0.1040073, 0.02846515, -0.1164175, 0.000658484, 0.01335344, 
@@ -74,11 +107,16 @@ int main()
 	double f[] = {-0.004874, 0.008821, 0.011692, -0.007248, -0.068989, -0.007224, 0.017296, 0.007138,0.003684, 
 		       0.003943, 0.000446, 0.000976, 0.000920, -0.000020};
 	
+	double nVol = lognormalToNormalVol(450,.1,.09,.1, .2,.000001);
+	
 	double a = pRec(&f[0], 14, 90, 450, .1, .09, .1, LOGNORMAL );
-	double b = pRec(&f[0], 14, 90, 450, .1, .09, .1, NORMAL );
+	double b = pRec(&f[0], 14, 90, 450, .1, .09, nVol, NORMAL );
 
 	double c = pPay(&f[0], 14, 90, 450, .1, .09, .1, LOGNORMAL );
-	double d = pPay(&f[0], 14, 90, 450, .1, .09, .1, NORMAL );
+	double d = pPay(&f[0], 14, 90, 450, .1, .09, nVol, NORMAL );
 	
-	printf("%f\n", a);
+	double diff = bCall(450, .1, .09, .1) - bnCall(450, .1, .09,nVol);
+	printf("%f\n", diff);
+	printf("%f,%f\n", a,b);
+	printf("%f,%f\n", c,d);
 }
