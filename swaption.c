@@ -98,6 +98,19 @@ double lognormalToNormalVol(double T, double K, double Fo, double s, double appr
 	return x;
 }
 
+double sabrNormalVol(double maturity, double strike, double forwardInitialValue, double volatilityInitialValue, double alpha, double beta, double rho)
+{
+        double zeta = alpha*(pow(forwardInitialValue, 1 - beta) - pow(strike, 1 - beta))/volatilityInitialValue/(1 - beta);
+        double delta = log((sqrt(1 - rho*zeta + zeta*zeta) + zeta - rho)/(1 - rho));
+        double fMid = (forwardInitialValue + strike)/2;
+        double gamma1 = beta/fMid;
+        double gamma2 = beta(beta - 1)/fMid/fMid;
+        double epsilon = maturity*alpha*alpha;
+        double c = pow(fMid, beta);
+        double normalVol = alpha*(forward - strike)/delta*(1 + ((2*gamma2 - gamma1*gamma1)*volatilityInitialValue*volatilityInitialValue*c*c/alpha/alpha/24 +
+                                rho*gamma1*volatilityInitialValue*c/alpha/4 + (2 - 3*rho*rho)/24)*epsilon);
+        return normalVol;
+}
 
 int main()
 {
@@ -116,7 +129,9 @@ int main()
 	double d = pPay(&f[0], 14, 90, 450, .1, .09, nVol, NORMAL );
 	
 	double diff = bCall(450, .1, .09, .1) - bnCall(450, .1, .09,nVol);
+	double sabrVol = sabrNormalVol(450,.1,.09,nVol,.1,.1,.1); 
 	printf("%f\n", diff);
 	printf("%f,%f\n", a,b);
 	printf("%f,%f\n", c,d);
+	printf("%f\n", sabrVol);
 }
