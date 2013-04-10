@@ -4,6 +4,7 @@
 #include <math.h>
 #include "spline.h"
 #include "swaption.h"
+#include<assert.h>
 
 double bCall(double T, double K, double Fo, double s)
 {
@@ -45,7 +46,7 @@ double bnPut(double T, double K, double Fo, double s)
 
 double pPay(double *l, double m, double To, double T, double K, double Fo, double s, model_type type)
 {
-	double p = AnnuityValuation(l, m, To, T, To,180);
+	double p = annuityFromBasisFunction(l, m, To, To, T, .5, 3);
 	if(type == LOGNORMAL)
 	{
 		p*=bCall(T,K,Fo,s);
@@ -57,7 +58,7 @@ double pPay(double *l, double m, double To, double T, double K, double Fo, doubl
 
 double pRec(double *l, double m, double To, double T, double K, double Fo, double s, model_type type)
 {
-	double p = AnnuityValuation(l, m, To, T, To,180);
+	double p = annuityFromBasisFunction(l, m, To, To, T, .5, 3);
 	if(type == LOGNORMAL)
 	{
 		p*=bPut(T,K,Fo,s);
@@ -104,22 +105,31 @@ double sabrNormalVol(double maturity, double strike, double forwardInitialValue,
         double delta = log((sqrt(1 - rho*zeta + zeta*zeta) + zeta - rho)/(1 - rho));
         double fMid = (forwardInitialValue + strike)/2;
         double gamma1 = beta/fMid;
-        double gamma2 = beta(beta - 1)/fMid/fMid;
+        double gamma2 = beta*(beta - 1)/fMid/fMid;
         double epsilon = maturity*alpha*alpha;
         double c = pow(fMid, beta);
-        double normalVol = alpha*(forward - strike)/delta*(1 + ((2*gamma2 - gamma1*gamma1)*volatilityInitialValue*volatilityInitialValue*c*c/alpha/alpha/24 +
+        double normalVol = alpha*(forwardInitialValue - strike)/delta*(1 + ((2*gamma2 - gamma1*gamma1)*volatilityInitialValue*volatilityInitialValue*c*c/alpha/alpha/24 +
                                 rho*gamma1*volatilityInitialValue*c/alpha/4 + (2 - 3*rho*rho)/24)*epsilon);
         return normalVol;
 }
 
 int main()
 {
-	double l[] = {0.05784418, 0.06702633, -0.1040073, 0.02846515, -0.1164175, 0.000658484, 0.01335344, 
-		     0.008509746, 0.003786817, 0.004015788, 0.000295547, 0.00124092, -0.000106187, -0.00000230};
+	double l[] = 
+	{
+		0.03190845, 0.002814546, 0.006497451, 0.006858175, 0.007298168, 0.006660141, 0.008085883,
+		0.02793383, 0.03311066, 0.03791496, -0.00926921, 0.4582085, -394.6686, -2.3e-06 
+	}; 
 
-	double f[] = {-0.004874, 0.008821, 0.011692, -0.007248, -0.068989, -0.007224, 0.017296, 0.007138,0.003684, 
-		       0.003943, 0.000446, 0.000976, 0.000920, -0.000020};
-	
+	double f[] =
+	{	
+		-0.01310881, 0.0012291, 0.001026269, 0.001448263, 0.001419661, 0.001422399, 0.003151944, 
+		0.02461342, 0.0323508, 0.03535055, -0.006182185, 0.4203752, -361.9657, -2e-05
+	};
+
+	assert( sizeof(l)/sizeof(double) == 14);
+	assert( sizeof(f)/sizeof(double) == 14);
+
 	double nVol = lognormalToNormalVol(450,.1,.09,.1, .2,.000001);
 	
 	double a = pRec(&f[0], 14, 90, 450, .1, .09, .1, LOGNORMAL );

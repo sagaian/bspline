@@ -12,19 +12,13 @@
   __typeof__ (b) _b = (b); \
   _a > _b ? _a : _b; })*/
 #define MAX(a, b)  (((a) > (b)) ? (a) : (b))
-const double T[] = {
-	-50.0, -30.0,-10.0, 0.0,
-	20.0,
-	50.0,
-	120.0,
-	250.0,
-	500.0,
-	2000.0,
-	3500.0,
-	5000.0,
-	7500.0,
-	11160.0,
-	13680.0, 16200.0, 19800.0, 25200.0
+
+const double T[] =
+{
+	-3.0, -2.0, -1.0,
+	0, .3, .6, 1, 1.5,
+	2, 4, 8, 16, 28,
+	40, 52, 64, 80, 100
 };
 const int K[] = { -3, -2, -1,
 	0, 1, 2, 3,
@@ -232,6 +226,7 @@ double ImpliedSwapRate(double *f, int m, double *l, int n, double T, double dayC
 {
 	double swapFloatingValuation = SwapFloatingValuation( l, n, 0, T, 0, dayCountSwap );
 	double annuityValuation = AnnuityValuation( f, m, 0, T, 0, dayCountAnnuity );
+	printf("old fixed: %f floating: %f \n", annuityValuation,swapFloatingValuation); 
 	return swapFloatingValuation / annuityValuation;
 }
 
@@ -328,6 +323,12 @@ void spline(double *p, double *x, int m, int n, void *data)
 	}
 }
 
+/*int main()
+{
+	double v = SplineIntegrate(0, 3, 30);
+	printf("%f\n", v);
+}
+*/
 /*int main()
 {
 	double p[28] =

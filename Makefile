@@ -30,7 +30,7 @@ LDFLAGS = -L$(-LAPACKLIBS_PATH)$ -L$(-GSL_PATH)$ -L. -lm
 # If you add/change names of header/source files, here is where you
 # edit the Makefile.
 HEADERS = spline.h
-SOURCES = spline.c swaption.c 
+SOURCES = swaption.c bspline.c  
 OBJECTS = $(SOURCES:.c=.o)
 LIBRARIES = -llevmar -llapack -lblas -lf2c -lgsl -lgslcblas
 TARGET = spline

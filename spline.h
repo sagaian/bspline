@@ -22,6 +22,8 @@ InstaneousRate(double *r, int m, double t );
 double //Discount factor calculation corresponding to equation (37)
 DiscountFactor(double *f, int m, double S, double T, double offset );
 double //Annuity calculation corresponding to equation (16)
+annuityFromBasisFunction(double *basisCoeffs, int numBasisCoeffs, double tValuation, double tStart, double tEnd, double dayCountFraction, int degree);
+double 
 AnnuityValuation(double *l, int m, double S, double T, double offset, double dayCount );
 double //Valuation formula for swap floating leg corresponding to equation (17) 
 SwapFloatingValuation(double *l, int m, double S, double T, double offset, double dayCount );
