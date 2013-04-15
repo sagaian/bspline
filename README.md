@@ -20,6 +20,9 @@ sudo apt-get install libf2c2-dev
 make
 sudo cp liblevmar.a /usr/local/lib/
 
+//Download gsl libraries
+sudo apt-get install gsl
+
 // Run BSpline
 // cd into bspline folder. In terminal type
 

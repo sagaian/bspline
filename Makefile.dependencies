@@ -1,0 +1,2 @@
+swaption.o: swaption.c spline.h swaption.h levmar.h
+bspline.o: bspline.c spline.h levmar.h
