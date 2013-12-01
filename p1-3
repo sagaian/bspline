@@ -1,0 +1,95 @@
+clear
+
+DI=[lambda1, lambda2, lambda3, lambda4];
+IR=[0.025, 0.025, 0.025, 0.025];
+
+dlambda=0.005;
+dr=0.005;
+
+Bprc=PV1;
+t1=1+1/12;
+
+Coup=6; r=0.025; L=(exp(r*0.5)-1)/0.5 ; R=0.2;
+[FRW, FRWND, Qt, Zt]=cal_forward(PV1, t1, Coup, r,  L, R, DI, IR, 2);
+[FRW12, FRWND12, Qt12, Zt12]=cal_forward(95.0883, t1, Coup, r+dr,  (exp((r+dr)*0.5)-1)/0.5, R, DI, IR+dr, 2);
+[FRW13, FRWND13, Qt13, Zt13]=cal_forward(95.4178, t1, Coup, r,  L, R, DI+dlambda, IR, 2);
+
+[FRW1T1, FRWND1T1, Qt1T1, Zt1T1]=cal_forward(Bprc, t1, Coup, r,  L, R, DI, IR, 1);
+
+Dr1=-(FRWND12-FRWND)/(dr*FRWND); 
+Ds1=-(FRWND13-FRWND)/(dlambda*FRWND*(1-R));
+
+Bprc=PV2;
+t1=1+1/12;
+Coup=6; r=0.025; L=(exp(r*0.5)-1)/0.5 ; R=0.5;
+[FRW2, FRWND2, Qt2, Zt2]=cal_forward(Bprc, t1, Coup, r, L, R, DI, IR, 2);
+[FRW22, FRWND22, Qt22, Zt22]=cal_forward(92.0171, t1, Coup, r+dr, (exp((r+dr)*0.5)-1)/0.5 , R, DI, IR+dr, 2);
+[FRW23, FRWND23, Qt23, Zt23]=cal_forward(93.8351, t1, Coup, r,  L, R, DI+dlambda, IR, 2);
+
+[FRW2T1, FRWND2T1, Qt2T1, Zt2T1]=cal_forward(Bprc, t1, Coup, r, L, R, DI, IR, 1);
+
+Dr2=-(FRWND22-FRWND2)/(dr*FRWND2); 
+Ds2=-(FRWND23-FRWND2)/(dlambda*FRWND2*(1-R));
+
+clear;
+clc
+
+Dr1=1.4537; Ds1=1.4449; rho=-0.3;
+
+t1=2+2/12; X=110;
+sigmaIR=0.006; sigmaCS=0.025; R=0.2; r=0.025;
+sigmaB=((Dr1*sigmaIR)^2+(Ds1*sigmaCS)^2+2*rho*Dr1*Ds1*sigmaIR*sigmaCS)^0.5;
+BND=98.8438; Qt=0.9092; Zt= 0.9473;
+[callpv, putpv]=cal_option(BND, X, sigmaB, 0.3, t1, Zt, Qt, R);
+FRW=91.6820;
+
+
+
+%%
+Dr2=6.0561; Ds2=5.6069;
+t1=2+2/12; X=110;
+sigmaIR=0.006; sigmaCS=0.025; R=0.5; r=0.025;
+sigmaB=((Dr2*sigmaIR)^2+(Ds2*sigmaCS)^2+2*rho*Dr2*Ds2*sigmaIR*sigmaCS)^0.5;
+BND=94.3803; Qt=0.9092; Zt=0.9473;
+[callpv2, putpv2]=cal_option(BND, X, sigmaB, 0.3, t1, Zt, Qt, R);
+FRW=90.3490;
+
+
+clear;
+load('lambda1.mat');
+load('lambda2.mat');
+load('lambda3.mat');
+load('lambda4.mat');
+
+tolX=10^(-10);
+tolfun=10^(-12);
+options=optimset('TolX',tolX, 'TolFun', tolfun,'MaxFunEvals', 4000);
+load('marketfwd1.mat');
+t1=2.25; T =4.0; N=7; CoupN=7;
+f= @(sparbar)calibrate_spar(sparbar, t1,T, N, CoupN, marketfwd1);
+[sparbar1, fval2]=fsolve(f, 0.045, options);
+
+r0=0.025; Zt=exp(-r0*2.25); Qt=exp(-lambda1*1.25)*exp(-lambda2*1.0);
+strike=0.035;
+[callprc1]=cal_priceNDcall(sparbar1, strike, t1, T, N, CoupN, Zt, Qt);
+strike=0.045;
+[callprc12]=cal_priceNDcall(sparbar1, strike, t1, T, N, CoupN, Zt, Qt);
+strike=0.055;
+[callprc13]=cal_priceNDcall(sparbar1, strike, t1, T, N, CoupN, Zt, Qt);
+
+%================================================================================
+
+t1=2.25; T =7.75; N=22; CoupN=22;
+f= @(sparbar)calibrate_spar(sparbar, t1,T, N, CoupN, marketfwd2);
+[sparbar2, fval2]=fsolve(f, 0.045, options);
+
+r0=0.025; Zt=exp(-r0*2.25); Qt=exp(-lambda1*1.25)*exp(-lambda2*1.0);
+strike=0.035;
+[callprc2]=cal_priceNDcall(sparbar2, strike, t1, T, N, CoupN, Zt, Qt);
+strike=0.045;
+[callprc22]=cal_priceNDcall(sparbar2, strike, t1, T, N, CoupN, Zt, Qt);
+strike=0.055;
+[callprc23]=cal_priceNDcall(sparbar2, strike, t1, T, N, CoupN, Zt, Qt);
+
+
+
