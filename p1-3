@@ -61,4 +61,27 @@ r0=0.025; Zt=exp(-r0*2.25); Qt=exp(-lambda1*1.25)*exp(-lambda2*1.0);
 [callprc23]=cal_priceNDcall(sparbar2, strike, t1, T, N, CoupN, Zt, Qt);
 
 
+%==========================
+function [Q, sigmacum]=calculate(S0, B, sigmas, r)
 
+
+for i=1:M
+    S(i)=S0*exp(r*(i-1)/4);
+    sigma(i)=sigmas*(S(i)/(S(i)+B));
+end
+sigmaint(1)=0;
+for i=2:M
+    sigmaint(i)=sigmaint(i-1)+(sigma(i-1)^2+sigma(i)^2)*1/4/2;
+end
+
+for i=1:M-1
+    sigmacum(i)=(sigmaint(i+1)/(i/4))^0.5;
+end
+
+d=(S0+B)/B;
+for i=1:M-1
+    T=i/4;
+    d1=log(d)/(sigmacum(i)*T^0.5);
+    d2=sigmacum(i)*T^0.5/2;
+    Q(i)=normcdf(d1-d2, 0, 1)-d*normcdf(-d1-d2,0,1);
+end
