@@ -85,3 +85,34 @@ for i=1:M-1
     d2=sigmacum(i)*T^0.5/2;
     Q(i)=normcdf(d1-d2, 0, 1)-d*normcdf(-d1-d2,0,1);
 end
+
+%=======================
+
+for n=1:N
+    for i=1:10
+        Q(n,i)=exp(-lambda(n)*T(i));
+        Z(n,i)=norminv(1-Q(n,i), 0, 1);
+    end
+end
+
+for n=1:N
+    for i=1:10
+        for m=1:Nm
+            tmp=(Z(n,i)-beta(n)*M(m))/(1-beta(n)^2)^0.5;
+            p(n,i,m)=normcdf(tmp, 0, 1);
+        end
+    end
+end
+
+Kmax=9;
+[PT, Pcum]=cal_loss_distribution(Kmax, Nm, N, k, p, M, dm);
+
+
+Kmax=27;
+[PTNot, ~]=cal_loss_distribution(Kmax, Nm, N, mk, p, M, dm);
+NT=zeros(1,10);
+for i=1:10  
+    for kk=1:Kmax+1
+        NT(i)=NT(i)+(kk-1)*stepp*PTNot(kk,i);
+    end
+end
